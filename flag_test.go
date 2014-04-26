@@ -28,16 +28,19 @@ func TestBoolFlagHelpOutput(t *testing.T) {
 
 var stringFlagTests = []struct {
 	name     string
+	value    string
 	expected string
 }{
-	{"help", "--help ''\t"},
-	{"h", "-h ''\t"},
+	{"help", "", "--help \t"},
+	{"h", "", "-h \t"},
+	{"h", "", "-h \t"},
+	{"test", "Something", "--test 'Something'\t"},
 }
 
 func TestStringFlagHelpOutput(t *testing.T) {
 
 	for _, test := range stringFlagTests {
-		flag := cli.StringFlag{Name: test.name}
+		flag := cli.StringFlag{Name: test.name, Value: test.value}
 		output := flag.String()
 
 		if output != test.expected {
@@ -108,13 +111,14 @@ func TestParseMultiStringSlice(t *testing.T) {
 		Flags: []cli.Flag{
 			cli.StringSliceFlag{Name: "serve, s", Value: &cli.StringSlice{}},
 		},
-		Action: func(ctx *cli.Context) {
+		Action: func(ctx *cli.Context) (err error) {
 			if !reflect.DeepEqual(ctx.StringSlice("serve"), []string{"10", "20"}) {
 				t.Errorf("main name not set")
 			}
 			if !reflect.DeepEqual(ctx.StringSlice("s"), []string{"10", "20"}) {
 				t.Errorf("short name not set")
 			}
+			return err
 		},
 	}).Run([]string{"run", "-s", "10", "-s", "20"})
 }
